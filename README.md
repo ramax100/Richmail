@@ -145,33 +145,74 @@ Klik **"Save Changes"**.
 5. **CATAT** 2 nameserver ini
 
 #### 4c. Ganti Nameserver Domain
-1. Login ke panel tempat Anda beli domain (Jagoan Hosting / Namecheap / Niagahoster / dll)
-2. Cari pengaturan **"Nameserver"** atau **"DNS Management"**
-3. Ganti/ubah nameserver ke 2 nameserver Cloudflare yang tadi dicatat
-4. Simpan
-5. Kembali ke Cloudflare → klik **"Done, check nameservers"**
-6. Tunggu 5-30 menit sampai status domain berubah jadi **"Active"** (cek di halaman Overview)
+
+> **Ini contoh untuk Jagoan Hosting. Panel lain tampilannya berbeda tapi langkahnya sama.**
+
+**Untuk Jagoan Hosting:**
+1. Login ke [my.jagoanhosting.com](https://my.jagoanhosting.com)
+2. Klik **"Domain"** di menu
+3. Klik domain Anda → klik **"Kelola Domain"** atau **"Manage"**
+4. Cari tab/menu **"Nameserver"**
+5. Hapus nameserver lama (biasanya `ns1.jagoanhosting.com` dll)
+6. Isi dengan nameserver Cloudflare:
+   - Nameserver 1: `adam.ns.cloudflare.com` *(contoh, pakai yang Cloudflare kasih)*
+   - Nameserver 2: `bella.ns.cloudflare.com` *(contoh, pakai yang Cloudflare kasih)*
+7. Klik **"Simpan"** / **"Update"**
+
+**Untuk Namecheap:**
+1. Login ke [namecheap.com](https://namecheap.com) → **"Domain List"**
+2. Klik **"Manage"** di samping domain
+3. Di bagian **"Nameservers"** → pilih **"Custom DNS"**
+4. Isi nameserver 1 dan 2 dari Cloudflare
+5. Klik centang hijau untuk simpan
+
+**Untuk Niagahoster:**
+1. Login ke [hpanel.hostinger.com](https://hpanel.hostinger.com)
+2. Klik domain → **"DNS / Nameserver"**
+3. Klik **"Ubah nameserver"**
+4. Isi dengan nameserver Cloudflare → Simpan
+
+**Setelah ganti nameserver:**
+1. Kembali ke Cloudflare → klik **"Done, check nameservers"**
+2. Tunggu 5-30 menit (kadang sampai 24 jam)
+3. Cek status di Cloudflare → halaman **Overview** → status harus **"Active"** ✅
+4. Cloudflare akan kirim email konfirmasi ke email Anda saat sudah aktif
 
 ---
 
 ### Langkah 5: Enable Email Routing
 
-1. Di Cloudflare Dashboard → klik domain Anda
-2. Menu kiri → klik **"Email"** → **"Email Routing"**
-3. Klik **"Enable Email Routing"** (link biru di atas)
-4. Jika muncul peringatan tentang MX record → klik **"Add records automatically"**
-5. Status akan berubah menjadi **"Ready"** atau **"Active"**
+> **Ini wajib dilakukan untuk setiap domain baru. Hanya 1 klik.**
+
+1. Buka [dash.cloudflare.com](https://dash.cloudflare.com)
+2. Klik domain Anda
+3. Di menu sebelah kiri, klik **"Email"**
+4. Klik **"Email Routing"**
+5. Anda akan melihat banner kuning bertuliskan:
+   > "Email Routing is currently disabled and not routing emails. **Enable Email Routing**"
+6. Klik link biru **"Enable Email Routing"**
+7. Jika muncul popup tentang MX record → klik **"Add records automatically"**
+8. Tunggu beberapa detik — status akan berubah dari "Disabled" menjadi **"Ready"** ✅
+9. Jika muncul pesan "Non-Cloudflare MX records exist":
+   - Kembali ke menu **"DNS"** → **"Records"**
+   - Hapus semua MX record yang **bukan** `route1/2/3.mx.cloudflare.net`
+   - Kembali ke Email Routing → klik Enable lagi
 
 ---
 
 ### Langkah 6: Buat Email Worker & Set Routing
 
 #### 6a. Buat Email Worker
-1. Masih di halaman Email Routing → klik tab **"Email Workers"**
-2. Klik **"Create"**
-3. Beri nama: `richmail-worker`
-4. **Hapus semua** code default yang ada di editor
-5. **Copy-paste code di bawah ini** (edit 2 baris yang ditandai):
+
+> **Worker hanya dibuat 1 kali. Berlaku untuk semua domain di akun Cloudflare Anda.**
+
+1. Buka [dash.cloudflare.com](https://dash.cloudflare.com) → klik domain Anda
+2. Menu kiri → klik **"Email"** → **"Email Routing"**
+3. Klik tab **"Email Workers"** (di samping tab "Routing rules")
+4. Klik tombol **"Create"**
+5. Di kolom nama, ketik: `richmail-worker`
+6. Anda akan melihat editor code. **Hapus semua code** yang ada di editor
+7. **Copy code di bawah** (EDIT 2 baris yang ditandai dulu sebelum paste):
 
 ```javascript
 export default {
@@ -249,14 +290,25 @@ export default {
 
 6. Klik **"Save and Deploy"**
 
-> **PENTING:** Worker ini hanya dibuat **1 kali**. Worker yang sama bisa dipakai untuk semua domain di akun Cloudflare Anda.
+> **PENTING:** 
+> - Ganti `NAMA-APP-ANDA` dengan nama app Anda di Render (contoh: `richmail`)
+> - Ganti `WEBHOOK_SECRET_ANDA` dengan secret yang sama persis dengan di Render Environment
+> - Worker ini hanya dibuat **1 kali**. Domain baru TIDAK perlu buat worker lagi.
 
 #### 6b. Set Catch-All Route
-1. Kembali ke **"Email Routing"** → tab **"Routing rules"**
-2. Di bagian **"Catch-all address"** → klik **Edit**
-3. Ubah Action menjadi: **"Send to a Worker"**
-4. Pilih: **richmail-worker**
-5. Klik **Save**
+
+> **Ini mengarahkan semua email yang masuk ke domain Anda supaya diteruskan ke Worker (lalu ke app).**
+
+1. Masih di halaman **"Email Routing"**
+2. Klik tab **"Routing rules"** (tab pertama)
+3. Cari bagian **"Catch-all address"** — biasanya di paling bawah
+4. Klik tombol **"Edit"** di sebelah kanannya
+5. Di dropdown **"Action"**, pilih: **"Send to a Worker"**
+6. Di dropdown yang muncul di bawahnya, pilih: **richmail-worker**
+7. Pastikan status **"Active"** (toggle hijau)
+8. Klik **"Save"**
+
+> **Catatan:** Langkah 6b ini perlu dilakukan **untuk setiap domain baru**. Tapi worker-nya sama (tidak perlu buat ulang).
 
 ---
 
@@ -310,11 +362,36 @@ Ini hanya diperlukan kalau Anda mau **tambah domain baru langsung dari admin pan
 1. Buka `https://NAMA-APP-ANDA.onrender.com/admin.html`
 2. Login dengan password admin
 3. Ketik domain baru → klik **"+ Tambah & Auto Setup"**
+4. App otomatis menambahkan domain ke Cloudflare dan set MX records
 
-### Langkah Manual (per domain baru):
-1. **Ganti nameserver** domain baru ke Cloudflare (di panel registrar)
-2. **Enable Email Routing** — Cloudflare → domain baru → Email → Email Routing → klik "Enable Email Routing"
-3. **Set Catch-all** — Routing rules → Catch-all → Edit → Send to Worker → pilih `richmail-worker` → Save
+### Langkah Manual yang HARUS dilakukan (setiap domain baru):
+
+**Manual 1 — Ganti Nameserver:**
+1. Login ke panel tempat beli domain baru
+2. Cari pengaturan "Nameserver" / "DNS"
+3. Ganti ke nameserver Cloudflare yang ditampilkan app setelah setup
+4. Simpan dan tunggu 5-30 menit sampai status domain "Active" di Cloudflare
+
+**Manual 2 — Enable Email Routing:**
+1. Buka [dash.cloudflare.com](https://dash.cloudflare.com)
+2. Klik domain baru yang ditambahkan
+3. Menu kiri → klik **"Email"** → klik **"Email Routing"**
+4. Akan muncul banner kuning: "Email Routing is currently disabled..."
+5. Klik link biru **"Enable Email Routing"**
+6. Kalau muncul popup tentang MX records → klik **"Add records automatically"**
+7. Status berubah jadi "Ready" ✅
+
+**Manual 3 — Set Catch-All ke Worker:**
+1. Masih di halaman Email Routing
+2. Klik tab **"Routing rules"** (tab pertama)
+3. Cari bagian **"Catch-all address"** (biasanya paling bawah)
+4. Klik tombol **"Edit"** di sebelah kanannya
+5. Di dropdown "Action" → pilih **"Send to a Worker"**
+6. Di dropdown berikutnya → pilih **"richmail-worker"**
+7. Pastikan toggle statusnya hijau (Active)
+8. Klik **"Save"**
+
+**Selesai!** Kirim test email dari Gmail ke alamat@domainbaru.com untuk memastikan berfungsi.
 
 ### Jangan lupa:
 Tambahkan domain baru ke environment variable `MAIL_DOMAINS` di Render:
