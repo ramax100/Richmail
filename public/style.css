@@ -327,8 +327,8 @@ body {
   background: #fff;
   border-radius: 4px;
   width: 100%;
-  max-width: 750px;
-  max-height: 90vh;
+  max-width: 900px;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
@@ -390,11 +390,20 @@ body {
   background: #fafafa;
   border: 1px solid #eee;
   border-radius: 3px;
-  min-height: 150px;
+  min-height: 200px;
   white-space: pre-wrap;
   word-wrap: break-word;
   font-size: 0.9em;
   line-height: 1.6;
+}
+
+.email-body img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 10px 0;
+  display: block;
 }
 
 /* Info Section */

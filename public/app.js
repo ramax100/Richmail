@@ -217,9 +217,13 @@ async function openEmail(id) {
     elements.emailTo.textContent = data.email.to;
     elements.emailSubject.textContent = data.email.subject;
     elements.emailDate.textContent = new Date(data.email.date).toLocaleString();
-    showEmailBody('text');
+    // Auto show HTML tab if email has images or HTML content
+    if (data.email.html && data.email.html.indexOf('<img') > -1) {
+      showEmailBody('html');
+    } else {
+      showEmailBody('text');
+    }
     elements.emailModal.classList.remove('hidden');
-    // Refresh list to update read status
     loadEmails();
   }
 }
