@@ -6,6 +6,16 @@ Aplikasi email sementara (temporary/disposable email) dengan dukungan **custom d
 
 ---
 
+## Komunitas
+
+**Projek ini gratis dan bebas dikembangkan!**
+
+Gabung channel Telegram untuk diskusi, update, dan bantuan:
+
+👉 **https://t.me/GrupRichStore**
+
+---
+
 ## Fitur
 
 - **Custom Domain** — Gunakan domain Anda sendiri (bisa banyak domain)
@@ -18,19 +28,11 @@ Aplikasi email sementara (temporary/disposable email) dengan dukungan **custom d
 - **Admin Panel** — Kelola domain, lihat statistik, panduan setup
 - **Password Protected** — Admin panel dilindungi password
 - **Auto Cleanup** — Email otomatis terhapus setelah waktu tertentu
-- **Statistik** — Total email, email hari ini, per domain breakdown
+- **Statistik Lengkap** — Total email, email hari ini, statistik per domain
 - **Dark Theme Admin** — Tampilan admin modern dan nyaman
 - **Zero Dependencies** — Hanya butuh Node.js, tanpa npm packages
 - **Mobile Friendly** — Responsive, bisa diakses dari HP
-
----
-
-## Demo
-
-| Halaman | Deskripsi |
-|---------|-----------|
-| `/` | Inbox utama - generate email, terima & baca pesan |
-| `/admin.html` | Admin panel - kelola domain, statistik |
+- **Auto Setup Domain** — Tambah domain baru dari admin panel
 
 ---
 
@@ -38,37 +40,58 @@ Aplikasi email sementara (temporary/disposable email) dengan dukungan **custom d
 
 | Layanan | Fungsi | Biaya |
 |---------|--------|-------|
-| [Cloudflare](https://cloudflare.com) | Menerima email & routing ke app | Gratis |
-| [Render](https://render.com) | Hosting web app | Gratis |
-| [GitHub](https://github.com) | Menyimpan source code | Gratis |
+| [Cloudflare](https://cloudflare.com) | Menerima email & routing ke app | **Gratis** |
+| [Render](https://render.com) | Hosting web app | **Gratis** |
+| [GitHub](https://github.com) | Menyimpan source code | **Gratis** |
 | Domain | Alamat email (misal: `@domain.com`) | Mulai Rp 14.000/tahun |
 
 **Total biaya: Rp 0 - Rp 14.000/tahun** (hanya biaya domain)
 
 ---
 
-## Cara Deploy (Step-by-Step)
+## Cara Kerja (Arsitektur)
 
-### Langkah 1: Fork/Clone Repository
-
-1. Login ke GitHub
-2. Fork repository ini, atau clone:
-```bash
-git clone https://github.com/ramax100/Richmail.git
 ```
+Seseorang kirim email ke alamat@domainanda.com
+        │
+        ▼
+Cloudflare Email Routing (menangkap email)
+        │
+        ▼
+Cloudflare Email Worker (meneruskan email ke app)
+        │
+        ▼ POST /webhook/email (dengan secret key)
+        │
+RichMail App di Render.com (menyimpan & menampilkan)
+        │
+        ▼
+Anda buka web → baca email di inbox
+```
+
+---
+
+## Cara Deploy (Step-by-Step Lengkap)
+
+### Langkah 1: Fork Repository
+
+1. Login ke [GitHub](https://github.com)
+2. Buka halaman repository ini
+3. Klik tombol **"Fork"** di kanan atas
+4. Sekarang Anda punya copy di akun sendiri
 
 ---
 
 ### Langkah 2: Deploy ke Render
 
-1. Buka [render.com](https://render.com) → daftar dengan GitHub (gratis, tanpa kartu)
-2. Klik **"New +"** → **"Web Service"**
-3. Connect repository **Richmail**
-4. Isi settings:
+1. Buka [render.com](https://render.com)
+2. Klik **"Get Started for Free"** → **Sign up with GitHub** (gratis, tanpa kartu)
+3. Setelah login, klik **"New +"** → **"Web Service"**
+4. Cari dan pilih repository **Richmail** yang sudah di-fork → klik **"Connect"**
+5. Isi settings:
 
 | Field | Value |
 |-------|-------|
-| Name | `richmail` (atau nama lain) |
+| Name | `richmail` (atau nama bebas) |
 | Region | Singapore (Southeast Asia) |
 | Branch | `main` |
 | Runtime | **Node** |
@@ -76,104 +99,208 @@ git clone https://github.com/ramax100/Richmail.git
 | Start Command | `node server/app.js` |
 | Instance Type | **Free** |
 
-5. Klik **"Create Web Service"**
-6. Tunggu 2-3 menit sampai status **"Live"**
+6. Klik **"Create Web Service"**
+7. Tunggu 2-3 menit sampai status **"Live"**
+8. Catat URL Anda, contoh: `https://richmail.onrender.com`
 
 ---
 
-### Langkah 3: Set Environment Variables
+### Langkah 3: Set Environment Variables di Render
 
-Di Render → service Anda → tab **"Environment"**, tambahkan:
+Di Render → service Anda → tab **"Environment"** → tambah variable berikut:
 
-| Key | Value | Keterangan |
+| Key | Value | Penjelasan |
 |-----|-------|-----------|
-| `MAIL_DOMAINS` | `yourdomain.com` | Domain Anda (pisah koma jika banyak) |
-| `ADMIN_PASSWORD` | `passwordanda` | Password untuk admin panel |
-| `WEBHOOK_SECRET` | `secret-key-random-anda` | Secret untuk verifikasi webhook |
-| `EMAIL_EXPIRY` | `60` | Menit sebelum email auto-hapus |
-| `CLOUDFLARE_API_TOKEN` | *(dari Cloudflare)* | Untuk auto-setup domain |
-| `CLOUDFLARE_ACCOUNT_ID` | *(dari Cloudflare)* | Account ID Cloudflare |
+| `MAIL_DOMAINS` | `domainanda.com` | Domain email Anda. Kalau lebih dari 1, pisah pakai koma: `domain1.com,domain2.com` |
+| `ADMIN_PASSWORD` | *(buat sendiri)* | Password untuk masuk admin panel. Contoh: `MyP@ssw0rd!` — pilih yang susah ditebak |
+| `WEBHOOK_SECRET` | *(buat sendiri)* | Kunci rahasia untuk verifikasi email masuk. Buat random, contoh: `xK9mW2pL7qR4s` — **ingat/catat ini karena nanti dipakai di Cloudflare Worker juga** |
+| `EMAIL_EXPIRY` | `60` | Berapa menit sebelum email otomatis dihapus. 60 = 1 jam |
 
-> **Penting:** Ganti semua value di atas dengan milik Anda sendiri. Jangan gunakan default.
+**Opsional** (untuk fitur auto-setup domain dari admin panel):
+
+| Key | Value | Penjelasan |
+|-----|-------|-----------|
+| `CLOUDFLARE_API_TOKEN` | *(dari Cloudflare)* | Cara dapat: lihat Langkah 7 di bawah |
+| `CLOUDFLARE_ACCOUNT_ID` | *(dari Cloudflare)* | Cara dapat: lihat Langkah 7 di bawah |
+
+Klik **"Save Changes"**.
 
 ---
 
-### Langkah 4: Setup Cloudflare
+### Langkah 4: Daftar Cloudflare & Tambah Domain
 
-#### 4a. Daftar Cloudflare (gratis)
+#### 4a. Daftar Cloudflare
 1. Buka [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up)
-2. Daftar dengan email (tanpa kartu kredit)
+2. Daftar dengan email — **gratis, tanpa kartu kredit**
 
-#### 4b. Tambah Domain ke Cloudflare
-1. Klik **"Add a site"** → masukkan domain Anda
-2. Pilih plan **Free** → Continue
-3. Cloudflare akan kasih **2 nameserver** (contoh: `xxx.ns.cloudflare.com`)
-4. **Ganti nameserver** di panel tempat beli domain ke nameserver Cloudflare
-5. Tunggu 5-30 menit sampai status domain jadi **"Active"**
+#### 4b. Tambah Domain
+1. Setelah login, klik **"Add a site"**
+2. Ketik domain Anda (contoh: `domainanda.com`) → klik **"Add site"**
+3. Pilih plan **Free (gratis)** → klik **"Continue"**
+4. Cloudflare akan menampilkan **2 nameserver**, contoh:
+   ```
+   adam.ns.cloudflare.com
+   bella.ns.cloudflare.com
+   ```
+5. **CATAT** 2 nameserver ini
 
-#### 4c. Enable Email Routing
-1. Di Cloudflare → pilih domain → menu kiri **"Email"** → **"Email Routing"**
-2. Klik **"Enable Email Routing"**
-3. Jika ada peringatan tentang MX record → klik **"Add records automatically"**
+#### 4c. Ganti Nameserver Domain
+1. Login ke panel tempat Anda beli domain (Jagoan Hosting / Namecheap / Niagahoster / dll)
+2. Cari pengaturan **"Nameserver"** atau **"DNS Management"**
+3. Ganti/ubah nameserver ke 2 nameserver Cloudflare yang tadi dicatat
+4. Simpan
+5. Kembali ke Cloudflare → klik **"Done, check nameservers"**
+6. Tunggu 5-30 menit sampai status domain berubah jadi **"Active"** (cek di halaman Overview)
 
-#### 4d. Buat Email Worker
-1. Di halaman Email Routing → tab **"Email Workers"**
-2. Klik **"Create"** → beri nama `richmail-worker`
-3. Hapus semua code default
-4. Buka file `cloudflare-worker.js` di repository ini
-5. **Edit baris pertama** di dalam function: ganti URL ke URL Render Anda:
+---
+
+### Langkah 5: Enable Email Routing
+
+1. Di Cloudflare Dashboard → klik domain Anda
+2. Menu kiri → klik **"Email"** → **"Email Routing"**
+3. Klik **"Enable Email Routing"** (link biru di atas)
+4. Jika muncul peringatan tentang MX record → klik **"Add records automatically"**
+5. Status akan berubah menjadi **"Ready"** atau **"Active"**
+
+---
+
+### Langkah 6: Buat Email Worker & Set Routing
+
+#### 6a. Buat Email Worker
+1. Masih di halaman Email Routing → klik tab **"Email Workers"**
+2. Klik **"Create"**
+3. Beri nama: `richmail-worker`
+4. **Hapus semua** code default yang ada di editor
+5. **Copy-paste code di bawah ini** (edit 2 baris yang ditandai):
+
 ```javascript
-var url = "https://NAMA-APP-ANDA.onrender.com/webhook/email";
+export default {
+  async email(message, env, ctx) {
+    // ⬇️ GANTI URL DENGAN URL RENDER ANDA ⬇️
+    var url = "https://NAMA-APP-ANDA.onrender.com/webhook/email";
+    // ⬇️ GANTI SECRET SAMA DENGAN WEBHOOK_SECRET DI RENDER ⬇️
+    var secret = "WEBHOOK_SECRET_ANDA";
+    var subject = message.headers.get("subject") || "No Subject";
+    var from = message.from || "unknown";
+    var to = message.to || "unknown";
+    var date = message.headers.get("date") || new Date().toISOString();
+    var contentType = message.headers.get("content-type") || "";
+    var raw = await new Response(message.raw).text();
+    var body = "";
+    var html = "";
+    var idx = raw.indexOf("\r\n\r\n");
+    if (idx === -1) {
+      idx = raw.indexOf("\n\n");
+    }
+    if (idx > -1) {
+      var content = raw.substring(idx + 4);
+      if (contentType.indexOf("multipart") > -1) {
+        var boundaryMatch = contentType.match(/boundary="?([^";\s]+)"?/);
+        if (boundaryMatch) {
+          var boundary = boundaryMatch[1];
+          var parts = content.split("--" + boundary);
+          for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (part.indexOf("text/plain") > -1) {
+              var partBody = part.indexOf("\r\n\r\n");
+              if (partBody === -1) partBody = part.indexOf("\n\n");
+              if (partBody > -1) {
+                body = part.substring(partBody + 4).trim();
+                body = body.replace(/--$/, "").trim();
+              }
+            } else if (part.indexOf("text/html") > -1) {
+              var partHtml = part.indexOf("\r\n\r\n");
+              if (partHtml === -1) partHtml = part.indexOf("\n\n");
+              if (partHtml > -1) {
+                html = part.substring(partHtml + 4).trim();
+                html = html.replace(/--$/, "").trim();
+              }
+            }
+          }
+        }
+      } else if (contentType.indexOf("text/html") > -1) {
+        html = content.trim();
+        body = content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      } else {
+        body = content.trim();
+      }
+    }
+    if (!body && html) {
+      body = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    }
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Webhook-Secret": secret
+      },
+      body: JSON.stringify({
+        from: from,
+        to: to,
+        subject: subject,
+        text: body,
+        html: html,
+        date: date
+      })
+    });
+  }
+}
 ```
-6. **Edit baris kedua**: ganti secret sama dengan `WEBHOOK_SECRET` di Render:
-```javascript
-var secret = "secret-key-random-anda";
-```
-7. Copy-paste semua code ke editor Cloudflare
-8. Klik **"Save and Deploy"**
 
-#### 4e. Set Catch-All Route
+6. Klik **"Save and Deploy"**
+
+> **PENTING:** Worker ini hanya dibuat **1 kali**. Worker yang sama bisa dipakai untuk semua domain di akun Cloudflare Anda.
+
+#### 6b. Set Catch-All Route
 1. Kembali ke **"Email Routing"** → tab **"Routing rules"**
 2. Di bagian **"Catch-all address"** → klik **Edit**
-3. Action: pilih **"Send to a Worker"**
+3. Ubah Action menjadi: **"Send to a Worker"**
 4. Pilih: **richmail-worker**
 5. Klik **Save**
 
 ---
 
-### Langkah 5: Buat Cloudflare API Token (Opsional - untuk auto-setup domain)
+### Langkah 7: Buat Cloudflare API Token (Opsional)
 
-Ini diperlukan jika ingin menambah domain baru langsung dari admin panel.
+Ini hanya diperlukan kalau Anda mau **tambah domain baru langsung dari admin panel** (fitur auto-setup).
 
+#### 7a. Buat API Token
 1. Buka [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens)
 2. Klik **"Create Token"**
-3. Scroll ke bawah → klik **"Get started"** (Custom Token)
+3. Scroll ke bawah → klik **"Get started"** (di bawah "Custom token")
 4. Isi:
-   - Token name: `RichMail`
-   - Permissions:
-     | Kiri | Tengah | Kanan |
-     |------|--------|-------|
+   - **Token name:** `RichMail` (atau nama bebas)
+   - **Permissions** (klik "+ Add more" untuk tambah baris):
+     | Kolom Kiri | Kolom Tengah | Kolom Kanan |
+     |---|---|---|
      | Zone | Zone | Edit |
      | Zone | DNS | Edit |
      | Zone | Zone Settings | Edit |
      | Zone | Email Routing Rules | Edit |
-   - Zone Resources: **Include** → **All zones**
+   - **Zone Resources:** Include → All zones
+   - **Account Resources:** Include → All accounts
 5. Klik **"Continue to summary"** → **"Create Token"**
-6. Copy token → taruh di environment variable `CLOUDFLARE_API_TOKEN` di Render
+6. **Copy token** (hanya muncul 1x!) → simpan
 
-Untuk **Account ID**:
-1. Buka Cloudflare → klik domain Anda → halaman Overview
-2. Scroll ke bawah kanan → copy **"Account ID"**
-3. Taruh di environment variable `CLOUDFLARE_ACCOUNT_ID` di Render
+#### 7b. Ambil Account ID
+1. Buka [dash.cloudflare.com](https://dash.cloudflare.com) → klik domain Anda
+2. Di halaman Overview, scroll ke bawah kanan
+3. Cari **"Account ID"** → copy
+
+#### 7c. Taruh di Render
+1. Render → service Anda → Environment → tambah:
+   - `CLOUDFLARE_API_TOKEN` = *(token dari step 7a)*
+   - `CLOUDFLARE_ACCOUNT_ID` = *(ID dari step 7b)*
+2. Save Changes
 
 ---
 
-### Langkah 6: Test!
+### Langkah 8: Test!
 
-1. Buka `https://NAMA-APP-ANDA.onrender.com`
-2. Generate atau buat email address
-3. Kirim email dari Gmail ke alamat tersebut
-4. Tunggu beberapa detik → email muncul di inbox!
+1. Buka URL app Anda: `https://NAMA-APP-ANDA.onrender.com`
+2. Generate atau buat email address (contoh: `test@domainanda.com`)
+3. Buka Gmail/Yahoo → kirim email ke alamat tersebut
+4. Kembali ke app → tunggu beberapa detik → email muncul!
 
 ---
 
@@ -183,13 +310,14 @@ Untuk **Account ID**:
 1. Buka `https://NAMA-APP-ANDA.onrender.com/admin.html`
 2. Login dengan password admin
 3. Ketik domain baru → klik **"+ Tambah & Auto Setup"**
-4. Ikuti langkah manual yang ditampilkan:
-   - Ganti nameserver domain di registrar
-   - Klik "Enable Email Routing" di Cloudflare
-   - Set Catch-all → Send to Worker
+
+### Langkah Manual (per domain baru):
+1. **Ganti nameserver** domain baru ke Cloudflare (di panel registrar)
+2. **Enable Email Routing** — Cloudflare → domain baru → Email → Email Routing → klik "Enable Email Routing"
+3. **Set Catch-all** — Routing rules → Catch-all → Edit → Send to Worker → pilih `richmail-worker` → Save
 
 ### Jangan lupa:
-Tambahkan domain baru juga ke environment variable `MAIL_DOMAINS` di Render:
+Tambahkan domain baru ke environment variable `MAIL_DOMAINS` di Render:
 ```
 MAIL_DOMAINS=domain1.com,domain2.com,domain3.com
 ```
@@ -197,17 +325,30 @@ Ini supaya domain tidak hilang saat Render restart.
 
 ---
 
-## Environment Variables
+## Tentang Webhook Secret
 
-| Variable | Required | Default | Keterangan |
-|----------|----------|---------|-----------|
-| `MAIL_DOMAINS` | Ya | - | Domain email, pisah koma |
-| `ADMIN_PASSWORD` | Ya | - | Password admin panel |
-| `WEBHOOK_SECRET` | Ya | - | Secret untuk webhook verification |
-| `EMAIL_EXPIRY` | Tidak | `60` | Menit sebelum email auto-hapus |
-| `CLOUDFLARE_API_TOKEN` | Tidak | - | Untuk auto-setup domain |
-| `CLOUDFLARE_ACCOUNT_ID` | Tidak | - | Cloudflare Account ID |
-| `PORT` | Tidak | `3000` | Port web server |
+**Webhook Secret** adalah kunci rahasia yang Anda buat sendiri. Bisa berupa kata/kalimat random apapun.
+
+**Fungsinya:** Memastikan hanya Cloudflare Worker Anda yang bisa mengirim email ke app. Tanpa secret yang benar, email palsu dari orang lain akan ditolak.
+
+**Aturan penting:**
+- Secret di **Render** (environment variable `WEBHOOK_SECRET`) harus **sama persis** dengan yang ada di code **Cloudflare Worker** (baris `var secret = "..."`)
+- Kalau berbeda, email tidak akan masuk
+- Buat yang random dan sulit ditebak
+
+---
+
+## Environment Variables (Lengkap)
+
+| Variable | Wajib? | Penjelasan |
+|----------|--------|-----------|
+| `MAIL_DOMAINS` | **Ya** | Domain email Anda, pisah koma. Contoh: `mail.com,inbox.id` |
+| `ADMIN_PASSWORD` | **Ya** | Password login admin panel. Buat yang susah ditebak |
+| `WEBHOOK_SECRET` | **Ya** | Kunci rahasia. Harus sama dengan yang di Cloudflare Worker |
+| `EMAIL_EXPIRY` | Tidak | Menit sebelum email auto-hapus (default: 60) |
+| `CLOUDFLARE_API_TOKEN` | Tidak | Untuk fitur auto-setup domain di admin panel |
+| `CLOUDFLARE_ACCOUNT_ID` | Tidak | Account ID Cloudflare (untuk auto-setup) |
+| `PORT` | Tidak | Port web server (default: 3000, Render set otomatis) |
 
 ---
 
@@ -216,19 +357,18 @@ Ini supaya domain tidak hilang saat Render restart.
 ```
 Richmail/
 ├── server/
-│   ├── app.js            # Web server + API routes
-│   ├── database.js       # JSON file storage
-│   └── cloudflare.js     # Cloudflare API helper
+│   ├── app.js            # Web server + semua API routes
+│   ├── database.js       # Penyimpanan data (JSON file)
+│   └── cloudflare.js     # Helper auto-setup domain via Cloudflare API
 ├── public/
 │   ├── index.html        # Halaman inbox utama
-│   ├── admin.html        # Admin panel
-│   ├── style.css         # Styling
-│   └── app.js            # Frontend logic
+│   ├── admin.html        # Admin panel (kelola domain, statistik)
+│   ├── style.css         # Styling tampilan
+│   └── app.js            # Logic frontend
 ├── cloudflare-worker.js  # Code untuk Cloudflare Email Worker
-├── config.js             # Konfigurasi app
-├── Dockerfile            # Docker deployment
-├── docker-compose.yml    # Docker Compose (untuk VPS)
-├── fly.toml              # Fly.io config (alternatif)
+├── config.js             # File konfigurasi
+├── Dockerfile            # Untuk deploy via Docker
+├── docker-compose.yml    # Untuk deploy di VPS
 ├── render.yaml           # Render blueprint
 └── package.json
 ```
@@ -237,6 +377,7 @@ Richmail/
 
 ## API Endpoints
 
+### Public API:
 | Method | Endpoint | Keterangan |
 |--------|----------|-----------|
 | GET | `/api/domains` | Daftar domain aktif |
@@ -249,7 +390,7 @@ Richmail/
 | POST | `/webhook/email` | Webhook terima email dari Cloudflare |
 | GET | `/health` | Health check |
 
-### Admin API (butuh Authorization header):
+### Admin API (butuh password):
 | Method | Endpoint | Keterangan |
 |--------|----------|-----------|
 | POST | `/admin/api/login` | Login admin |
@@ -263,39 +404,19 @@ Richmail/
 
 ## Deployment Alternatif
 
-### Docker (VPS)
+### Docker (untuk VPS sendiri)
 ```bash
 git clone https://github.com/ramax100/Richmail.git
 cd Richmail
+# Edit docker-compose.yml sesuai kebutuhan
 docker compose up -d
 ```
 
-### Manual (VPS/Local)
+### Manual (lokal/VPS)
 ```bash
 git clone https://github.com/ramax100/Richmail.git
 cd Richmail
-node server/app.js
-```
-
----
-
-## Arsitektur
-
-```
-Email pengirim (Gmail/Yahoo/dll)
-        │
-        ▼
-Cloudflare Email Routing
-        │
-        ▼
-Cloudflare Email Worker
-        │
-        ▼ POST /webhook/email
-        │
-RichMail App (Render.com)
-        │
-        ▼
-JSON Storage → Web Inbox
+MAIL_DOMAINS=domainanda.com ADMIN_PASSWORD=passwordanda WEBHOOK_SECRET=secretanda node server/app.js
 ```
 
 ---
@@ -303,46 +424,64 @@ JSON Storage → Web Inbox
 ## FAQ
 
 **Q: Apakah benar-benar gratis?**
-A: Ya, selama menggunakan Render free tier + Cloudflare free plan. Hanya perlu bayar domain.
+A: Ya. Render + Cloudflare = gratis. Hanya bayar domain (mulai Rp 14rb/tahun).
 
-**Q: Bisa diakses dari HP?**
-A: Ya, semua bisa dilakukan dari browser HP.
+**Q: Bisa deploy dari HP tanpa PC?**
+A: Ya! Gunakan Google Cloud Shell (shell.cloud.google.com) di browser HP atau langsung deploy via Render dashboard.
 
-**Q: Email dari Gmail bisa masuk?**
-A: Ya, email dari layanan manapun bisa masuk selama MX record benar.
+**Q: Email dari Gmail/Yahoo bisa masuk?**
+A: Ya, email dari layanan manapun bisa masuk selama MX record dan Email Routing sudah benar.
 
 **Q: Berapa lama email tersimpan?**
-A: Sesuai setting `EMAIL_EXPIRY` (default 60 menit). Bisa diubah.
+A: Sesuai setting `EMAIL_EXPIRY` (default 60 menit). Ubah di Environment Render.
 
 **Q: Bisa untuk banyak domain?**
-A: Ya, tidak ada batasan jumlah domain.
-
-**Q: Apakah aman?**
-A: Email disimpan di server Render. Untuk keamanan tambahan, ganti `ADMIN_PASSWORD` dan `WEBHOOK_SECRET` dengan nilai yang kuat.
+A: Ya, tidak ada batasan. Tambah lewat admin panel atau environment variable.
 
 **Q: Render free tier ada batasannya?**
-A: Ya, app akan "sleep" setelah 15 menit tidak ada traffic. Akses pertama setelah sleep butuh ~30 detik untuk "bangun". Email yang masuk saat sleep akan tetap diterima karena Cloudflare Worker yang meneruskan.
+A: App akan "sleep" setelah 15 menit tidak ada traffic. Akses pertama setelah sleep butuh ~30 detik. Email yang masuk saat sleep tetap diterima saat app bangun.
+
+**Q: Apa bedanya WEBHOOK_SECRET dengan ADMIN_PASSWORD?**
+A: `ADMIN_PASSWORD` untuk login ke admin panel. `WEBHOOK_SECRET` untuk verifikasi email yang masuk dari Cloudflare. Keduanya harus berbeda dan rahasia.
+
+**Q: Apakah Cloudflare Worker perlu dibuat per domain?**
+A: Tidak. Worker dibuat **1 kali saja** dan berlaku untuk semua domain di akun Cloudflare yang sama. Domain baru hanya perlu set Catch-all ke worker yang sudah ada.
+
+**Q: Kenapa Email Routing tidak bisa di-enable otomatis?**
+A: Ini limitasi Cloudflare — untuk pertama kali enable di domain baru, harus dari dashboard (1 klik). Setelah aktif, semuanya berjalan otomatis.
 
 ---
 
 ## Keamanan
 
-- Ganti `ADMIN_PASSWORD` dari default
-- Gunakan `WEBHOOK_SECRET` yang unik dan panjang
-- Jangan share API Token Cloudflare Anda
-- Email bersifat sementara dan akan otomatis terhapus
+- **Ganti** `ADMIN_PASSWORD` — jangan pakai default
+- **Buat** `WEBHOOK_SECRET` yang unik dan panjang
+- **Jangan share** API Token Cloudflare
+- Email bersifat **sementara** dan auto-terhapus
+- Admin panel **dilindungi password**
+- Webhook **diverifikasi** dengan secret key
+
+---
+
+## Lisensi
+
+**MIT License** — Projek ini gratis dan bebas dikembangkan oleh siapapun.
+
+Silakan fork, modifikasi, dan gunakan untuk keperluan pribadi maupun komersial.
+
+---
+
+## Komunitas & Support
+
+Gabung channel Telegram untuk diskusi, update, request fitur, dan bantuan:
+
+👉 **https://t.me/GrupRichStore**
 
 ---
 
 ## Kontribusi
 
 Pull request welcome! Silakan fork dan buat perubahan.
-
----
-
-## Lisensi
-
-MIT License
 
 ---
 
