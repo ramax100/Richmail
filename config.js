@@ -8,17 +8,17 @@ module.exports = {
   // Default domain(s) - can be managed via admin panel
   DOMAINS: process.env.MAIL_DOMAINS 
     ? process.env.MAIL_DOMAINS.split(',') 
-    : ['richmail.web.id'],
+    : ['example.com'],
 
   // Web Server settings  
   WEB_PORT: parseInt(process.env.PORT || process.env.WEB_PORT || '3000'),
   WEB_HOST: process.env.WEB_HOST || '0.0.0.0',
 
   // Webhook secret (to verify Cloudflare requests)
-  WEBHOOK_SECRET: process.env.WEBHOOK_SECRET || 'richmail-secret-key-2026',
+  WEBHOOK_SECRET: process.env.WEBHOOK_SECRET || 'change-this-secret',
 
   // Admin panel password
-  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'admin123',
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'change-this-password',
 
   // Cloudflare API (for auto domain setup)
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN || '',

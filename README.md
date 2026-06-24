@@ -101,7 +101,7 @@ Anda buka web → baca email di inbox
 
 6. Klik **"Create Web Service"**
 7. Tunggu 2-3 menit sampai status **"Live"**
-8. Catat URL Anda, contoh: `https://richmail.onrender.com`
+8. Catat URL Anda, contoh: `https://nama-app-anda.onrender.com`
 
 ---
 

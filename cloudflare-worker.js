@@ -1,7 +1,9 @@
 export default {
   async email(message, env, ctx) {
-    var url = "https://richmail.onrender.com/webhook/email";
-    var secret = "richmail-secret-key-2026";
+    // GANTI URL DENGAN URL RENDER ANDA
+    var url = "https://NAMA-APP-ANDA.onrender.com/webhook/email";
+    // GANTI SECRET SAMA DENGAN WEBHOOK_SECRET DI RENDER
+    var secret = "GANTI-DENGAN-WEBHOOK-SECRET-ANDA";
     var subject = message.headers.get("subject") || "No Subject";
     var from = message.from || "unknown";
     var to = message.to || "unknown";
