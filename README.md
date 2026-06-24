@@ -504,7 +504,7 @@ MAIL_DOMAINS=domainanda.com ADMIN_PASSWORD=passwordanda WEBHOOK_SECRET=secretand
 A: Ya. Render + Cloudflare = gratis. Hanya bayar domain (mulai Rp 14rb/tahun).
 
 **Q: Bisa deploy dari HP tanpa PC?**
-A: Ya! Gunakan Google Cloud Shell (shell.cloud.google.com) di browser HP atau langsung deploy via Render dashboard.
+A: Ya! Langsung deploy via Render dashboard di browser HP. Tidak perlu install apapun.
 
 **Q: Email dari Gmail/Yahoo bisa masuk?**
 A: Ya, email dari layanan manapun bisa masuk selama MX record dan Email Routing sudah benar.
