@@ -131,12 +131,25 @@ async function addEmailMXRecords(zoneId, domain) {
 
 // Enable Email Routing for zone
 async function enableEmailRouting(zoneId) {
-  // The correct endpoint is POST /zones/{zone_id}/email/routing/dns
-  const res = await cfRequest('POST', '/zones/' + zoneId + '/email/routing/dns');
+  // Method 1: POST /zones/{zone_id}/email/routing/dns (new API)
+  var res = await cfRequest('POST', '/zones/' + zoneId + '/email/routing/dns');
   if (res.success) return true;
-  // Try alternative endpoint
-  const res2 = await cfRequest('POST', '/zones/' + zoneId + '/email/routing/enable');
-  return res2.success || (res2.errors && res2.errors[0] && res2.errors[0].message.includes('already'));
+  console.log('[CF] Enable method 1 failed:', JSON.stringify(res.errors || []));
+
+  // Method 2: POST /zones/{zone_id}/email/routing/enable (legacy)
+  res = await cfRequest('POST', '/zones/' + zoneId + '/email/routing/enable');
+  if (res.success) return true;
+  console.log('[CF] Enable method 2 failed:', JSON.stringify(res.errors || []));
+
+  // Method 3: PUT /zones/{zone_id}/email/routing with enabled=true
+  res = await cfRequest('PUT', '/zones/' + zoneId + '/email/routing', {
+    enabled: true,
+    skip_wizard: true
+  });
+  if (res.success) return true;
+  console.log('[CF] Enable method 3 failed:', JSON.stringify(res.errors || []));
+
+  return false;
 }
 
 // Create catch-all rule to forward to webhook
