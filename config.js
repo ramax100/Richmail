@@ -19,7 +19,7 @@ module.exports = {
   SMTP_HOST: process.env.SMTP_HOST || '0.0.0.0',
 
   // Web Server settings  
-  WEB_PORT: parseInt(process.env.WEB_PORT || '3000'),
+  WEB_PORT: parseInt(process.env.PORT || process.env.WEB_PORT || '3000'),
   WEB_HOST: process.env.WEB_HOST || '0.0.0.0',
 
   // Email settings
